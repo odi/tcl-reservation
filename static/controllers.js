@@ -370,25 +370,25 @@ reservationApp.controller('ReservationCtrl', ['$scope', '$http', function($scope
 	var type = switchResult($scope.reservationTypSelect)
 	var comment = getComment(document.getElementById('comment'));
 
-	// for (i=0; i<courts.length; i++) {
-	//     $.post( url + "/put/reservation",
-	// 	    { name1: name1,
-	// 	      name2: name2,
-	// 	      name3: name3,
-	// 	      name4: name4,
-	// 	      date: date,
-	// 	      time: time,
-	// 	      length: length,
-	// 	      court: courts[i],
-	// 	      type: type,
-	// 	      comment: comment
-	// 	    } ).fail( function (xhr, status, error) {
-	// 		window.location = url + "?status=1&msg=" + xhr.responseText;
-	// 	    }).done( function (data) {
-	// 		var msg = "Reservierung erfolgreich gespeichert!";
-	// 		window.location = url + "?status=0&msg=" + msg;
-	// 	    });
-	// }
+	for (i=0; i<courts.length; i++) {
+	    $.post( url + "/put/reservation",
+		    { name1: name1,
+		      name2: name2,
+		      name3: name3,
+		      name4: name4,
+		      date: date,
+		      time: time,
+		      length: length,
+		      court: courts[i],
+		      type: type,
+		      comment: comment
+		    } ).fail( function (xhr, status, error) {
+			window.location = url + "?status=1&msg=" + xhr.responseText;
+		    }).done( function (data) {
+			var msg = "Reservierung erfolgreich gespeichert!";
+			window.location = url + "?status=0&msg=" + msg;
+		    });
+	}
 	
     };
     
