@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="reservationApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Reservierungssystem TC Laa</title>
+    
+    <link rel="import" href="header.html">
+  </head>
+  <body ng-controller="ReservationListCtrl">
+
+    <div ng-include="'navigation.html'"></div>
+
+    <div class="alert alert-success alert-dismissible" role="alert" ng-if="msg != null && status == '0'">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      {{msg}}
+    </div>
+    
+    <div class="alert alert-error alert-dismissible" role="alert" ng-if="msg != null && status == '1'">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      {{msg}}
+    </div>
+    
+    <div id="listElement" class="panel panel-primary">
+      <div class="panel-heading">
+	<h1 class="panel-title">{{titleDate}}</h1>
+      </div>
+
+      <div class="panel-body">
+	<div class="input-group date" id="datetimepicker1" ng-controller="DateCtrl">
+	  <input type="text" class="form-control" readonly="readonly" id="datetimepicker1Value"/>      
+	  <div class="input-group-btn">
+	    <button type="button" class="btn btn-default" ng-click="removeDate()">
+	      <span class="glyphicon glyphicon-chevron-left"></span>
+	    </button>
+	    <button type="button" class="btn btn-default input-group-addon1">
+		<span class="glyphicon glyphicon-calendar"></span>
+	    </button>
+	    <button type="button" class="btn btn-default" ng-click="addDate()">
+	      <span class="glyphicon glyphicon-chevron-right"></span>	      
+	    </button>	    
+	  </div>
+	</div>
+	<script type="text/javascript">
+	  $(function () {
+	  var d = new Date();
+	  $('#datetimepicker1').datetimepicker({
+	  locale: 'de',
+	  format: 'YYYY-MM-DD',
+	  ignoreReadonly: true,
+	  showClose: true,
+	  allowInputToggle: true,
+	  focusOnShow: false,
+	  defaultDate: new Date()
+	  });
+	  $('#datetimepicker1').on("dp.change", function (e) {
+	  var scope = angular.element(document.getElementById('listElement')).scope();
+	  var date = document.getElementById('datetimepicker1Value').value;
+	  scope.$apply(function () {
+	  scope.getList() });
+	  });
+	  });
+	</script>
+      </div>
+      <div class="container" ng-if="reservations.length == 0">
+	<div class="center-block alert alert-warning" role="alert">
+	  Keine Plätze reserviert an diesem Tag.
+	</div>	    
+      </div>
+      
+      <div ng-repeat="res in reservations | unique:'startTime' | orderBy:'startTime'">
+	<h3>&nbsp;&nbsp;&nbsp;{{res.startTime}} - {{res.stopTime}}</h3>	
+	<table class="table table-striped">
+	  <tbody>
+	    <tr ng-repeat-start="r in reservations | filter: {startTime: res.startTime} | orderBy:'court'">
+	      <td width="70px"><span class="label label-warning">Platz {{r.court}}</span></td>
+	      <td width="30px" ng-if="currentLoginName != null && currentLoginName != ''">
+		<span class="label label-primary" ng-if="r.type == 1">E</span>
+		<span class="label label-primary" ng-if="r.type == 2">D</span>
+		<span class="label label-info" ng-if="r.type == 3">T</span>
+		<span class="label label-success" ng-if="r.type == 4">M</span>		
+		<span class="label label-danger" ng-if="r.type == 5">R</span>	      
+	      </td>
+	      <td>
+		<span ng-repeat="p in r.persons" ng-if="currentLoginName != null && currentLoginName != ''">
+		  <span class="label label-default" style="word-wrap: break-word;white-space:normal;" ng-if="r.type == 1 || r.type == 2 || r.type == 5">{{p.fname}} {{p.lname}}</span>
+		  <span ng-if="r.type == 3 || r.type == 4">
+		    <b>{{r.comment}}</b> (<span>{{p.fname}} {{p.lname}}</span>)
+		  </span>
+		</span>
+		<span ng-if="currentLoginName == null || currentLoginName == ''">
+		  <strong>Reserviert</strong>
+		</span>
+	      </td>
+	      <td>
+		<!-- TODO: hier müssen noch zusätzlich informationen beim speichern
+		     gesammelt werden, wie z.b. werd die Reservierung angelegt hat
+		<button class="btn btn-default" ng-if="!r.expanded" ng-click="r.expanded = true"><span class="glyphicon glyphicon-chevron-down"/></button>
+		<button class="btn btn-default" ng-if="r.expanded" ng-click="r.expanded = false"><span class="glyphicon glyphicon-chevron-up"/></button>
+		-->
+	      </td>
+	    </tr>
+	    <tr ng-repeat-end="" ng-if="r.expanded">
+	      <td colspan="4">
+		<strong>Angelegt von: </strong>
+	      </td>
+	    </tr>
+	  </tbody>
+	</table>
+      </div>
+      <div class="panel-footer" ng-if="reservations.length > 0 && currentLoginName != null && currentLoginName != ''">
+	<span class="label label-primary">E</span>
+	<span class="label label-primary">D</span> Einzel/Doppel &nbsp;
+	<span class="label label-danger">R</span> Rangliste
+	<span class="label label-info">T</span> Training &nbsp;
+	<span class="label label-success">M</span> Meisterschaft &nbsp;
+      </div>
+    </div>
+    <br/>
+    <div ng-include="'footer.html'"></div>
+  </body>
+</html>

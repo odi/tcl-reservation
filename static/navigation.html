@@ -1,0 +1,60 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed"
+	      data-toggle="collapse"
+	      data-target="#bs-example-navbar-collapse-1"
+	      aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- Brand Logo -->
+      <a class="navbar-brand" href="/">
+        <img alt="TC Laa" src="logo-laa.png"/>
+	<span>TC Laa</span>
+      </a>
+    </div>
+    
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <!-- check if logged in or not -->
+      <ul class="nav navbar-nav" ng-if="currentLoginName == null || currentLoginName == ''">
+	<li><a href="/login.html">Login</a></li>
+      </ul>
+      <ul class="nav navbar-nav" ng-if="currentLoginName != null && currentLoginName != ''">
+	<li><a href="/">Reservierungen</a></li>
+        <li class=""><a href="new.html">Neue Reservierung</a></li>
+	<!-- <li><a href="statistic.html">Statistik</a></li> -->
+      </ul>
+      <ul class="nav navbar-nav navbar-right"
+	  ng-if="currentLoginName != null && currentLoginName != ''">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+	     role="button" aria-haspopup="true"
+	     aria-expanded="false">
+	    <strong>{{currentLoginName.login}}</strong> (
+	    <span ng-if="currentLoginName.role == 0">su</span>
+	    <span ng-if="currentLoginName.role == 1">admin</span>
+	    <span ng-if="currentLoginName.role == 2">mitglied</span>
+	    <span ng-if="currentLoginName.role == 3">trainer</span>
+	    <span ng-if="currentLoginName.role == 4">jugend</span>
+	    ) <span class="caret"></span>	    
+	  </a>
+          <ul class="dropdown-menu">
+	    <!-- <li><a href="help.html">Hilfe</li> -->
+	    <!-- TODO: check on server if user is really su or admin -->
+	    <li><a href="dash.html">{{currentLoginName.fname}} {{currentLoginName.lname}}</a></li>
+	    <li ng-if="currentLoginName.role < 2"><a href="admin.html">Admin</a></li>
+	    <li role="separator" class="divider"></li>
+	    <li><a href="/auth/logout">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<br/><br/><br/>
+

@@ -1,18 +1,25 @@
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module App where
 
--- import Snap.Snaplet                        (Snaplet, SnapletInit, makeSnaplet)
--- import Snap.Snaplet.Auth                   (AuthManager)
--- import Snap.Snaplet.Session.SessionManager (SessionManager)
+import Control.Lens                        (makeLenses)
 
--- data App = App
---     { _auth :: Snaplet (AuthManager App)
---     , _sess :: Snaplet SessionManager
---     }
+import Snap.Snaplet                        (Snaplet, Handler, SnapletInit, makeSnaplet,
+                                            nestSnaplet)
+import Snap.Snaplet.Auth                   (AuthManager, defAuthSettings)
+import Snap.Snaplet.Session.SessionManager (SessionManager)
+import Snap.Snaplet.Session.Backends.CookieSession
+import Snap.Snaplet.Auth.Backends.SqliteSimple
+import Snap.Snaplet.Auth.Backends.JsonFile
+import Snap.Snaplet.SqliteSimple
 
--- app :: SnapletInit App App
--- app = makeSnaplet "app" "snaplet example" Nothing $ do
---   s <- nestSnaplet "sess" sess $
---       initCookieSessionManager "site_key.txt" "sess" (Just 3600)
---   a <- nestSnaplet "auth" auth $
---       initJsonFileAuthManager defaultAuthSettings sess "users.json"
---   return $ App s s
+data App = App
+  { _auth :: Snaplet (AuthManager App)
+  , _sess :: Snaplet SessionManager
+  , _dbr  :: Snaplet Sqlite
+  }
+
+makeLenses ''App
+
+type AppHandler = Handler App App

@@ -1,21 +1,33 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc7102" }:
+{ nixpkgs ? import <nixpkgs> {}, compiler ? "default" }:
 
 let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, snap, stdenv }:
+  f = { mkDerivation, aeson, base, base64-bytestring, bytestring
+      , either, errors, lens, lists, old-time, snap, snap-core
+      , snap-server, snaplet-sqlite-simple, sqlite-simple, stdenv, text
+      , time, transformers, utf8-string
+      }:
       mkDerivation {
         pname = "reservation";
         version = "0.1.0.0";
         src = ./.;
         isLibrary = false;
         isExecutable = true;
-        buildDepends = [ base snap ];
+        executableHaskellDepends = [
+          aeson base base64-bytestring bytestring either errors lens lists
+          old-time snap snap-core snap-server snaplet-sqlite-simple
+          sqlite-simple text time transformers utf8-string
+        ];
         license = stdenv.lib.licenses.bsd3;
       };
 
-  drv = pkgs.haskell.packages.${compiler}.callPackage f {};
+  haskellPackages = if compiler == "default"
+                       then pkgs.haskellPackages
+                       else pkgs.haskell.packages.${compiler};
+
+  drv = haskellPackages.callPackage f {};
 
 in
 

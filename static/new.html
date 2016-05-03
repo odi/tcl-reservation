@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="reservationApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reservierungssystem TC Laa</title>
+    <link rel="import" href="header.html">
+  </head>
+  <body  ng-controller="ReservationCtrl">
+    <div ng-include="'navigation.html'"></div>
+
+
+    <div ng-show="reservationNr == 0">
+      <div class="alert alert-danger" role="alert">
+	Leider hast du dein Kontigent an Reservierungen aufgebraucht.
+      </div>
+    </div>
+
+    <div ng-show="freeReservations == 1">
+      <div class="alert alert-warning" role="alert">
+	Du hast nur mehr eine Stunde in deinem Kontingent für deine Reservierungen.
+      </div>
+    </div>
+
+    <div ng-show="freeReservations < 10 && freeReservations > 1">
+      <div class="alert alert-info alert-dismissable" role="alert">
+	<button type="button" class="close" data-dismiss="alert"
+		aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
+	Du kannst noch {{freeReservations}} Stunden reservieren.
+      </div>
+    </div>
+
+    <div id="saveError"></div>
+    <!--
+    <div id="saveError">
+      <div class="alert alert-danger" role="alert">
+    	Keine Reservierung mehr möglich! Kontingent aufgebraucht.
+      </div>
+      <div class="panel panel-primary" ng-if="currentLoginName != null">
+    	<div class="panel-heading">
+    	  <h1 class="panel-title">Meine offenen Reservierungen</h1>
+    	</div>
+    	<table class="table table-striped">
+    	  <tr><th>Datum</th><th>Uhrzeit</th><th>Spieler</th><th>Typ</th><th></th></tr>
+    	  <tr ng-repeat="res in userReservations | orderBy:'date'">
+    	    <td>{{res.date}}</td>
+    	    <td>{{res.startTime}}-{{res.stopTime}}</td>
+    	    <td>
+    	      <div ng-repeat="p in res.persons">{{p.fname}} {{p.lname}}</div>
+    	    </td>
+    	    <td>
+    	      <span class="label label-primary" ng-if="res.type == 1">E</span>
+    	      <span class="label label-primary" ng-if="res.type == 2">D</span>
+    	      <span class="label label-info" ng-if="res.type == 3">T</span>
+    	      <span class="label label-success" ng-if="res.type == 4">M</span>
+    	      <span class="label label-danger" ng-if="res.type == 5">R</span>
+    	    </td>
+    	    <td>
+    	      <button type="button" class="btn btn-danger" ng-click="deleteRes(res.id)">Löschen</button>
+    	  </tr>
+    	</table>
+      </div>
+      
+    </div>
+    -->
+
+    <div id="saveForm" ng-hide="reservationNr == 0">
+    <form accept-charset="UTF-8" id="reservationForm">
+      <div class="panel panel-primary">
+	<div class="panel-heading">
+	  <h1 class="panel-title">Basisdaten</h1>
+	</div>
+	<div class="panel-body">
+	  <div class="form-group">
+	    <label for="sel1">Reservierungstyp:</label>
+	    <select class="form-control" id="sel1" ng-model="reservationTypSelect" ng-change="update()">
+	      <option ng-repeat="item in items" value="{{item}}">{{item}}</option>
+	    </select>
+	  </div>
+	  <label for="players" ng-if="reservationTyp == 1 || reservationTyp == 2 || reservationTyp == 5">Spielernamen:</label>
+	  <label for="players" ng-if="reservationTyp == 3 || reservationTyp == 4">Ansprechperson:</label>
+	    <span ng-repeat="i in nrPlayers">
+	      <input type="text" class="form-control" placeholder="Vorname Nachname" aria-describedby="basic-addon1" bs3-typeahead bs3-source="names" ng-model="player" id="player{{i.nr}}" autocomplete="off"/><br/>
+	    </span>
+	    <div ng-if="reservationTyp == 3 || reservationTyp == 4">
+	      <label for="comment">Kommentar:</label>
+	      <input type="text" class="form-control" placeholder="Kommentar" id="comment"/>
+	    </div>
+	</div>
+      </div>
+ 
+      <div class="panel panel-primary">
+	<div class="panel-heading">
+	  <h1 class="panel-title">Datum und Platz</h1>
+	</div>
+	<div class="panel-body">
+	  <div>
+	    <label for="date">Spielbeginn:</label>
+	    <div class='input-group date' id='datetimepicker2'>
+	      <input type='text' class="form-control" readonly="readonly" id="datetimepicker2Value" />
+	      <span class="input-group-addon input-group-addon1">
+		<span class="glyphicon glyphicon-calendar"></span>
+	      </span>
+	    </div>
+	    <script type="text/javascript">
+	      $(function () {
+	      var d = new Date();
+	      $('#datetimepicker2').datetimepicker({
+	      locale: 'de',
+	      format: 'YYYY-MM-DD HH:00',
+	      ignoreReadonly: true,
+	      showClose: true,
+	      allowInputToggle: true,
+	      focusOnShow: false,
+	      defaultDate: d.setHours(d.getHours() + 1)
+	      });
+	      $('#datetimepicker2').on("dp.change", function (e) {
+	      var scope = angular.element(document.getElementById('reservationForm')).scope();
+	      var date = document.getElementById('datetimepicker2Value').value.split(' ')[0];
+	      var time = document.getElementById('datetimepicker2Value').value.split(' ')[1];
+	      scope.$apply(function () {
+	      scope.loadPage = 1;
+	      scope.triggerOverview(date, time) });
+	      });
+	      });
+	    </script>
+	  </div>
+	  <br/>
+	  <div>
+	    <label>Spieldauer</label>
+	    <input id="gamelength" type="text" value="1" name="gamelength"></input>
+            <script>
+	      $('#gamelength').on('touchspin.on.startspin', function () {
+	      var scope = angular.element(document.getElementById('reservationForm')).scope();
+	      var length = document.getElementById('gamelength').value;
+	      scope.$apply(function () {
+	      scope.setGameLength(length);
+	      });
+	      });
+            </script>
+	    <br/>
+	  </div>
+	  <div ng-repeat="res in reservations | unique:'startTime'">
+	    <h3>&nbsp;&nbsp;&nbsp;{{res.startTime}} - {{res.stopTime}}</h3>	
+	    <table class="table table-striped">
+	      <tbody>
+		<tr ng-repeat="r in reservations | filter: {startTime: res.startTime}">
+		  <td width="70px"><span class="label label-warning">Platz {{r.court}}</span></td>
+		  <td width="30px">
+		    <span class="label label-primary" ng-if="r.type == 1">E</span>
+		    <span class="label label-primary" ng-if="r.type == 2">D</span>
+		    <span class="label label-info" ng-if="r.type == 3">T</span>
+		    <span class="label label-success" ng-if="r.type == 4">M</span>		
+		    <span class="label label-danger" ng-if="r.type == 5">R</span>	      
+		  </td>
+		  <td>
+		    <span ng-repeat="p in r.persons">
+		      <span class="label label-default" style="word-wrap: break-word;white-space:normal;" ng-if="r.type == 1 || r.type == 2 || r.type == 5">{{p.fname}} {{p.lname}}</span>
+		      <span ng-if="r.type == 3 || r.type == 4">
+			<b>{{r.comment}}</b> (<span>{{p.fname}} {{p.lname}}</span>)
+		      </span>
+		    </span>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </div>
+
+	  <div ng-show="reservations.length == 0 && errorMsg == null">
+	      <div class="alert alert-success" role="alert">
+		Keine Plätze zu dieser Zeit reserviert.
+	      </div>	    
+	  </div>
+
+	  <div ng-show="courts.length == 0">
+	    <div class="alert alert-danger" roler="alert" ng-show="errorMsg != null">
+	      {{errorMsg}}
+	    </div>
+	  </div>
+	  <div ng-if="courts.length > 0">
+	    <div ng-show="infoMsg != null" class="alert alert-warning">{{infoMsg}}</div>
+	    <label for="court">Freie Plätze:</label><br>
+	    <div class="btn-group" data-toggle="buttons" ng-if="reservationTypSelect != 'Meisterschaft' && reservationTypSelect != 'Training'">
+	      <label class="btn btn-primary active" ng-repeat-start="c in courts" ng-if="$first">
+		<input type="radio" checked name="options" id="courtSelect-{{c}}" autocomplete="off">
+		Platz {{c}}
+	      </label>
+	      <label class="btn btn-primary" ng-repeat-end="" ng-if="!$first">
+		<input type="radio" name="options" id="courtSelect-{{c}}" autocomplete="off">
+		Platz {{c}}
+	      </label>
+	    </div>
+	    <div class="btn-group" data-toggle="buttons" ng-if="reservationTypSelect == 'Meisterschaft' || reservationTypSelect == 'Training'">
+	      <label class="btn btn-primary" ng-repeat="c in courts">
+		<input type="checkbox" autocomplete="off" id="courtSelect-{{c}}">
+		Platz {{c}}
+	      </label>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      <center>
+	<button type="submit" class="btn btn-success" ng-click="save()">Speichern</button>
+	<button type="button" class="btn btn-default" ng-click="">Abbrechen</button>
+      </center>
+    </form>
+    </div>
+    <br/>
+    <center>
+      © Oliver Dunkl <a href="mailto:oliver.dunkl@gmail.com">oliver.dunkl@gmail.com</a><br/>
+      Sourcecode und Issue-Tracker: <a href="">https://github.com/odi/tcl-reservation</a>
+    </center>
+
+  </body>
+</html>

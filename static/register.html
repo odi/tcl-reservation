@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="reservationApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Reservierungssystem TC Laa</title>
+
+    <!-- jquery -->
+    <script src="jquery.min.js"></script>
+    <script src="jquery-ui.js"></script>
+
+    <!-- moment -->
+    <script src="moment/moment.js"></script>
+
+    <!-- bootstrap -->
+    <script src="bootstrap/dist/js/bootstrap.js"></script>
+    <link href="bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+    <!-- angular -->
+    <script src="angular.min.js"></script>
+    
+    <!-- bootstrap date picker -->
+    <script type="text/javascript" src="bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"></script>
+    <link rel="stylesheet" href="bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
+
+    <!-- bootstrap typeahead -->
+    <script src="Bootstrap-3-Typeahead/bootstrap3-typeahead.js"></script>
+    <script src="angular-bootstrap3-typeahead/angular-bootstrap3-typeahead.js"></script>
+
+    <!-- bootstrap validator -->
+    <script src="bootstrap-validator/js/validator.js"></script>
+
+    <script src="angularUtils/src/directives/pagination/dirPagination.js"></script>
+    
+    <!-- my controllers -->
+    <script src="controllers.js"></script>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+	<!-- Brand and toggle get grouped for better mobile display -->
+	<div class="navbar-header">
+	  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+	  </button>
+	  <a class="navbar-brand" href="/">
+            <img alt="TC Laa" src="logo-laa.png"/>
+	    <span>TC Laa</span>
+	  </a>
+	</div>
+
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <form action="/auth/register" data-toggle="validator" role="form">    
+      <div class="panel panel-primary">
+	<div class="panel-heading">
+	  <h3 class="panel-title">Register user</h3>
+	</div>
+	<div class="panel-body">
+	  <!-- username -->
+	  <div class="form-group has-feedback">
+	    <label for="username" class="control-label">Username</label>
+	    <input type="text" class="form-control" name="username" id="username" data-minlength="3" required placeholder="Benutzername"></input>
+	    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+	    <div class="help-block with-errors">Username muß mindestens 3 Zeichen lang sein.</div>
+	  </div>
+
+	  <!-- pasword -->
+	  <div class="form-group">
+	    <label for="password" class="control-label">Password</label>
+	    <div class="form-group has-feedback">
+	      <input type="password" class="form-control" name="password" id="password" required placeholder="Passwort" data-minlength="5"></input>
+	      <span class="glyphicon form-control-feedback" aria-hidden="true"></span>	     
+	      <div class="help-block">Das Paßwort muß mindestens 5 Zeichen lang sein!</div>
+	    </div>
+	    <div class="form-group has-feedback">
+	      <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" required data-match="#password" data-match-error="Paßwörter passen nicht überein!" placeholder="Confirm"></input>
+	      <span class="glyphicon form-control-feedback" aria-hidden="true"></span>      
+	      <div class="help-block with-errors"></div>
+	    </div>	    
+	  </div>
+	  <!-- first name -->
+	  <div class="form-group has-feedback">
+	    <label for="firstname" class="control-label">Vorname</label>
+	    <input type="text" class="form-control" name="fname" id="firstname" data-minlength="3" required placeholder="Vorname"></input>
+	    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+	    <div class="help-block with-errors"></div>
+	  </div>
+
+	  <!-- last name -->
+	  <div class="form-group has-feedback">
+	    <label for="lastname" class="control-label">Nachname</label>
+	    <input type="text" class="form-control" name="lname" id="lastname" data-minlength="3" required placeholder="Nachname"></input>
+	    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+	    <div class="help-block with-errors"></div>
+	  </div>
+
+	  <br/>
+	  <input type="submit" class="btn btn-success"/>
+	  <button type="button" class="btn btn-default" onclick="window.open('/', '_self')">Abbrechen</button>
+	</div>
+      </div>
+    </form>    
+  </body>
+</html>

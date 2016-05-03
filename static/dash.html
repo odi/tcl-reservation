@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="reservationApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reservierungssystem TC Laa</title>
+    <link rel="import" href="header.html">
+  </head>
+  <body ng-controller="PersonCtrl">
+    <div ng-include="'navigation.html'"></div>
+
+    <!--
+    <div class="panel panel-primary"
+	 ng-if="currentLoginName != null && currentLoginName != ''">
+      <div class="panel-heading">
+	<h4 class="panel-title">
+	  <i class="glyphicon glyphicon-user"></i>
+	  Persönliche Daten
+	</h4>
+      </div>
+      <div class="panel-body">
+	<h1>
+	  {{currentLoginName.fname}} {{currentLoginName.lname}}
+	  <small ng-if="currentLoginName.role == 0">( SuperUser )</small>
+	  <small ng-if="currentLoginName.role == 1">( Admin )</small>
+	  <small ng-if="currentLoginName.role == 2">( Mitglied )</small>
+	  <small ng-if="currentLoginName.role == 3">( Trainer )</small>
+	  <small ng-if="currentLoginName.role == 4">( Jugend )</small>	    
+	</h1>
+	<h2>Paßwort ändern</h2>
+      </div>
+      <div class="panel-footer">
+	<strong>Angelegt am: </strong> aaaa &nbsp;
+	<strong>Geändert am: </strong> bbbb &nbsp;
+      </div>
+    </div>
+    -->
+      
+    
+    <div class="panel panel-primary" ng-if="currentLoginName != null && currentLoginName != ''">
+      <div class="panel-heading">
+	<h4 class="panel-title">
+	  <i class="glyphicon glyphicon-th-list"></i>
+	  Offene Reservierungen
+	</h4>
+      </div>
+      <table class="table table-striped">
+	<tr><th>Datum</th><th>Uhrzeit</th><th>Spieler</th><th>Typ</th><th></th></tr>
+	<tr ng-repeat="res in userReservations | orderBy:'date'">
+	  <td>{{res.date}}</td>
+	  <td>{{res.startTime}}-{{res.stopTime}}</td>
+	  <td>
+	    <div ng-repeat="p in res.persons">{{p.fname}} {{p.lname}}</div>
+	  </td>
+	  <td>
+	    <span class="label label-primary" ng-if="res.type == 1">E</span>
+	    <span class="label label-primary" ng-if="res.type == 2">D</span>
+	    <span class="label label-info" ng-if="res.type == 3">T</span>
+	    <span class="label label-success" ng-if="res.type == 4">M</span>
+	    <span class="label label-danger" ng-if="res.type == 5">R</span>	      
+	  </td>
+	  <td>
+	    <button type="button" class="btn btn-danger" ng-click="deleteRes(res.id)">Löschen</button>
+	</tr>
+      </table>
+    </div>    
+    <div ng-include="'footer.html'"></div>
+  </body>
+</html>

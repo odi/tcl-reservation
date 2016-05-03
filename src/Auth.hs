@@ -26,12 +26,10 @@ validCredentials = [ "b2xpdmVyLmR1bmtsQGdtYWlsLmNvbTpvZGk=" ]
 extractCredentials ∷ ByteString → Maybe ByteString
 extractCredentials bs = case BS.split 32 bs of
     [] → Nothing
-    hs → chkH hs
-    where
-        chkH h
-            | length h < 2     = Nothing -- header is corrupt or not available  
-            | head h /= "Basic" = Nothing -- header does not start with 'Basic'
-            | otherwise        = (Just $ head . tail $ h)
+    hs → case hs of
+        h | length h < 2     → Nothing  -- header is corrupt or not available
+          | head h /= "Basic" → Nothing  -- header does not start with "Basic"
+          | otherwise        → (Just $ head . tail $ h)
 
 -- | Check if the credentials are valid or not.
 -- TODO: get credentials from DB?

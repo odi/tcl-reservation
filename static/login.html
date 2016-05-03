@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="reservationApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Reservierungssystem TC Laa</title>
+
+    <!-- jquery -->
+    <script src="jquery.min.js"></script>
+    <script src="jquery-ui.js"></script>
+
+    <!-- moment -->
+    <script src="moment/moment.js"></script>
+
+    <!-- bootstrap -->
+    <script src="bootstrap/dist/js/bootstrap.js"></script>
+    <link href="bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+    <!-- angular -->
+    <script src="angular.min.js"></script>
+    
+    <!-- bootstrap date picker -->
+    <script type="text/javascript" src="bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"></script>
+    <link rel="stylesheet" href="bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
+
+    <!-- bootstrap typeahead -->
+    <script src="Bootstrap-3-Typeahead/bootstrap3-typeahead.js"></script>
+    <script src="angular-bootstrap3-typeahead/angular-bootstrap3-typeahead.js"></script>
+
+    <!-- bootstrap validator -->
+    <script src="bootstrap-validator/js/validator.js"></script>
+
+    <script src="angularUtils/src/directives/pagination/dirPagination.js"></script>
+    
+    <!-- my controllers -->
+    <script src="controllers.js"></script>
+  </head>
+  <body ng-controller="LoginCtrl">
+
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+	<!-- Brand and toggle get grouped for better mobile display -->
+	<div class="navbar-header">
+	  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+	  </button>
+	  <a class="navbar-brand" href="/">
+            <img alt="TC Laa" src="logo-laa.png"/>
+	    <span>TC Laa</span>
+	  </a>
+	</div>
+
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="alert alert-danger" role="alert" ng-if="failure != null">
+      <strong>Fehler bei login:</strong> {{failure}}
+    </div>
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+	<h3 class="panel-title">Login</h3>
+      </div>
+      <div class="panel-body">
+	<form action="/auth/login" data-toggle="validator" role="form">
+	  <div class="form-group has-feedback">
+	    <label for="username" class="control-label">Username</label>
+	    <input type="text" class="form-control" name="username" id="username" required placeholder="Benutzername" data-error="Feld muß ausgefüllt sein!"></input>
+	    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+	    <div class="help-block with-errors"></div>
+	  </div>
+	  <div class="form-group has-feedback">
+	    <label for="password" class="control-label">Password</label>
+	    <input type="password" class="form-control" name="password" id="password" required placeholder="Paßwort" data-error="Feld muß ausgefüllt sein!"></input>
+	    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+	    <div class="help-block with-errors"></div>
+	  </div>
+	  <br/>
+	  <input type="submit" class="btn btn-success" value="Login"/>
+	  <button type="button" class="btn btn-info" onclick="window.open('/register.html', '_self')">Neuer Benutzer</button>
+	</form>
+      </div>
+    </div>
+    
+  </body>
+</html>
