@@ -49,7 +49,6 @@
 		</td>
 		<td ng-show="editUser[user.id]">
 		  <!-- TODO: remove superuser from list -->
-		  {{selectedRole}}
 		  <select class="form-control" ng-model="selectedRole" ng-options="o.id as o.name for o in roles|filter:{id : '!0'}"></select>
 		</td>
 	      </tr>

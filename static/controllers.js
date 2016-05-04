@@ -142,7 +142,6 @@ reservationApp.controller('ReservationListCtrl', ['$scope', '$http', function($s
 	    }
 	});
     };
-	
 
     init();
 //    currentLogin();
@@ -649,9 +648,14 @@ reservationApp.controller('ReservationCtrl', ['$scope', '$http', function($scope
 //	});
 //    };
 
+    $scope.addUser = function () {
+	document.getElementById('player1').value = "" + $scope.currentLoginName.fname + " " + $scope.currentLoginName.lname;
+    };
+    
     
     init();
 
+    
 //    currentLogin();
 //    loadPlayers();
 //    getUserResNr();
@@ -795,9 +799,9 @@ reservationApp.controller('PersonCtrl', ['$scope', '$http', function($scope, $ht
 	});
     }
 
+    $scope.userReservations = [];
     var getUserRes = function () {
 	$http.get(url + "/get/resbyuser").success(function (data) {
-	    $scope.userReservations = [];
 	    var ret = data;
 	    for (i=0; i<ret.length; i++) {
 		var date = moment(ret[i].date + " " + ret[i].startTime);

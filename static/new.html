@@ -34,41 +34,9 @@
     </div>
 
     <div id="saveError"></div>
-    <!--
-    <div id="saveError">
-      <div class="alert alert-danger" role="alert">
-    	Keine Reservierung mehr möglich! Kontingent aufgebraucht.
-      </div>
-      <div class="panel panel-primary" ng-if="currentLoginName != null">
-    	<div class="panel-heading">
-    	  <h1 class="panel-title">Meine offenen Reservierungen</h1>
-    	</div>
-    	<table class="table table-striped">
-    	  <tr><th>Datum</th><th>Uhrzeit</th><th>Spieler</th><th>Typ</th><th></th></tr>
-    	  <tr ng-repeat="res in userReservations | orderBy:'date'">
-    	    <td>{{res.date}}</td>
-    	    <td>{{res.startTime}}-{{res.stopTime}}</td>
-    	    <td>
-    	      <div ng-repeat="p in res.persons">{{p.fname}} {{p.lname}}</div>
-    	    </td>
-    	    <td>
-    	      <span class="label label-primary" ng-if="res.type == 1">E</span>
-    	      <span class="label label-primary" ng-if="res.type == 2">D</span>
-    	      <span class="label label-info" ng-if="res.type == 3">T</span>
-    	      <span class="label label-success" ng-if="res.type == 4">M</span>
-    	      <span class="label label-danger" ng-if="res.type == 5">R</span>
-    	    </td>
-    	    <td>
-    	      <button type="button" class="btn btn-danger" ng-click="deleteRes(res.id)">Löschen</button>
-    	  </tr>
-    	</table>
-      </div>
-      
-    </div>
-    -->
 
     <div id="saveForm" ng-hide="reservationNr == 0">
-    <form accept-charset="UTF-8" id="reservationForm">
+    <form id="reservationForm" data-toggle="validator" role="form">
       <div class="panel panel-primary">
 	<div class="panel-heading">
 	  <h1 class="panel-title">Basisdaten</h1>
@@ -76,19 +44,53 @@
 	<div class="panel-body">
 	  <div class="form-group">
 	    <label for="sel1">Reservierungstyp:</label>
-	    <select class="form-control" id="sel1" ng-model="reservationTypSelect" ng-change="update()">
+	    <select class="form-control" id="sel1"
+		    ng-model="reservationTypSelect" ng-change="update()">
 	      <option ng-repeat="item in items" value="{{item}}">{{item}}</option>
 	    </select>
 	  </div>
-	  <label for="players" ng-if="reservationTyp == 1 || reservationTyp == 2 || reservationTyp == 5">Spielernamen:</label>
-	  <label for="players" ng-if="reservationTyp == 3 || reservationTyp == 4">Ansprechperson:</label>
-	    <span ng-repeat="i in nrPlayers">
-	      <input type="text" class="form-control" placeholder="Vorname Nachname" aria-describedby="basic-addon1" bs3-typeahead bs3-source="names" ng-model="player" id="player{{i.nr}}" autocomplete="off"/><br/>
-	    </span>
-	    <div ng-if="reservationTyp == 3 || reservationTyp == 4">
-	      <label for="comment">Kommentar:</label>
-	      <input type="text" class="form-control" placeholder="Kommentar" id="comment"/>
+	  <label for="players"
+		 ng-if="reservationTyp == 1 || reservationTyp == 2 || reservationTyp == 5">
+	    Spielernamen:
+	  </label>
+	  <label for="players"
+		 ng-if="reservationTyp == 3 || reservationTyp == 4">
+	    Ansprechperson:
+	  </label>
+	  <span ng-repeat="i in nrPlayers" class="form-group has-feedback">
+	    <div class="input-group" ng-if="$first">
+	      <span class="input-group-addon" id="sizing-addon1">
+		Person {{i.nr}}
+	      </span>
+	      <input type="text" class="form-control"
+		     placeholder="Vorname Nachname"
+		     aria-describedby="basic-addon1"
+		     bs3-typeahead bs3-source="names"
+		     ng-model="player" id="player{{i.nr}}"
+		     autocomplete="off" required
+		     data-error="Feld muß ausgefüllt sein und aus Vor- und Nachname bestehen."
+		     pattern="^[A-Za-z]+\ [A-Za-z]*$">
+	      <span class="input-group-btn">
+		<button class="btn btn-primary" type="button" ng-click="addUser()">
+		  <strong class="glyphicon glyphicon-user"></strong>
+		</button>
+	      </span>
 	    </div>
+	    <div class="help-block with-errors"></div>
+	    <div class="input-group form-group" ng-if="!$first">
+	      <span class="input-group-addon" id="sizing-addon1">Person {{i.nr}}</span>
+	      <input type="text" class="form-control"
+		     placeholder="Vorname Nachname"
+		     aria-describedby="basic-addon1"
+		     bs3-typeahead bs3-source="names"
+		     ng-model="player" id="player{{i.nr}}"
+		     autocomplete="off"/>
+	    </div>
+	  </span>
+	  <div ng-if="reservationTyp == 3 || reservationTyp == 4">
+	    <label for="comment">Kommentar:</label>
+	    <input type="text" class="form-control" placeholder="Kommentar" id="comment"/>
+	  </div>
 	</div>
       </div>
  
@@ -99,8 +101,8 @@
 	<div class="panel-body">
 	  <div>
 	    <label for="date">Spielbeginn:</label>
-	    <div class='input-group date' id='datetimepicker2'>
-	      <input type='text' class="form-control" readonly="readonly" id="datetimepicker2Value" />
+	    <div class="input-group date" id='datetimepicker2'>
+	      <input type="text" class="form-control" readonly="readonly" id="datetimepicker2Value" />
 	      <span class="input-group-addon input-group-addon1">
 		<span class="glyphicon glyphicon-calendar"></span>
 	      </span>
@@ -203,8 +205,15 @@
 	</div>
       </div>
       <center>
-	<button type="submit" class="btn btn-success" ng-click="save()">Speichern</button>
-	<button type="button" class="btn btn-default" onclick="window.open('/','_self')">Abbrechen</button>
+	<div class="form-group">
+	  <!-- TODO: should be disabled if not all fields are valid -->
+	  <button type="submit" class="btn btn-success" ng-click="save()">
+	    Reservieren
+	  </button>
+	  <button type="button" class="btn btn-default" onclick="window.open('/','_self')">
+	    Abbrechen
+	  </button>
+	</div>
       </center>
     </form>
     </div>
