@@ -23,6 +23,7 @@ executable reservation
                      , aeson
                      , base64-bytestring
                      , bytestring >= 0.10.6.0
+                     , directory
                      , either
                      , errors
                      , lens

@@ -37,6 +37,9 @@ import Snap.Snaplet.Auth.Backends.JsonFile
 import Snap.Http.Server.Config
 import Snap.Snaplet.SqliteSimple
 
+import System.Directory
+import System.Environment
+
 import qualified Data.ByteString.UTF8 as BU
 
 --import System.Time
@@ -250,10 +253,11 @@ handleDeleteReservation db = do
 
 handleTest :: Handler App (AuthManager App) ()
 handleTest = do
-  t <- getPostParam "test"
+  t <- getParam "test"
+  dir <- liftIO getCurrentDirectory
   liftIO $ print (T.unpack . T.decodeUtf8 $ fromJust t)
   liftIO $ putStrLn (T.unpack . T.decodeUtf8 $ fromJust t)
-  writeBS $ fromJust t
+  writeBS $ BSC.pack $ dir
 
 handleAllUsers :: DBName -> Handler App (AuthManager App) ()
 handleAllUsers db = do
@@ -293,8 +297,8 @@ handleFreeCourts db = do
   --     redirect "/"
   
 -- | Configuration of the main app.
-app :: DBName -> SnapletInit App App
-app db = makeSnaplet "app" "reservation system" Nothing $ do
+app :: DBName -> FilePath -> SnapletInit App App
+app db wdir = makeSnaplet "app" "reservation system" Nothing $ do
   s <- nestSnaplet "session" sess $
        initCookieSessionManager "site_key.txt" "cookie" Nothing
   a <- nestSnaplet "auth" auth $
@@ -315,13 +319,19 @@ app db = makeSnaplet "app" "reservation system" Nothing $ do
             , ("/put/reservation", with auth $ method POST (handleSaveReservation db))
             , ("/put/user", with auth $ method POST (handleUpdateUser db))
             , ("/test", with auth $ handleTest)
-            , ("/", serveDirectory "static")
+            , ("/", serveDirectory (wdir ++ "static"))
             ]
   return $ App a s d
 
 main :: IO ()
 main = do
-  let db = "reservation.db"
-  serveSnaplet defaultConfig $ app db
+--  let db = "reservation.db"
+  -- TODO: very bad workaround
+  args <- getArgs
+  let workingDir = args !! 0
+  let db = args !! 1
+  putStrLn $ "working directory: " ++ workingDir
+  putStrLn $ "database: " ++ db
+  serveSnaplet defaultConfig $ app db workingDir
 --  let db = "reservation.db"
 --  quickHttpServe (site db)
