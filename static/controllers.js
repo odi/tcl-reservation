@@ -4,9 +4,23 @@ var curDate = "";
 var saveError = null;
 var saveSuccess = null;
 var saveStatus = null;
-var url = "http://127.0.0.1:8000"
+
+// local development
+// var url = "http://127.0.0.1:8000"
+// var rootDir = "/";
+
+// remote dunkl.ddns.net -> Test instance
+var url = "http://dunkl.ddns.net/tclaa-test"
+var rootDir = "/tclaa-test/"
+
+// remote dunkl.ddns.net -> Production instance
+// var url = "http://dunkl.ddns.net/tclaa
+// var rootDir = "/tclaa
+
+// misc
 //var url = "http://192.168.1.100:8000"
 //var url = "http://192.168.1.10:8000"
+//var url = "http://10.233.1.2:8000"
 
 moment.locale("de");
 
@@ -35,10 +49,12 @@ reservationApp.filter('unique', function () {
     };
 });
 
+/*
 reservationApp.config(function($httpProvider) {
     $httpProvider.defaults.useXDomain = true;
     delete $httpProvider.defaults.headers.common['X-Requested-With'];
 });
+*/
 
 reservationApp.controller('DateCtrl', ['$scope', function($scope) {
     var param = window.location.search.split('date=')[1];
@@ -50,6 +66,7 @@ reservationApp.controller('ReservationListCtrl', ['$scope', '$http', function($s
 
     $scope.status = getParameterByName('status');
     $scope.msg = getParameterByName('msg');
+    $scope.rootDir = rootDir;
 
     function str_pad(n) {
 	return String("00" + n).slice(-2);
@@ -151,6 +168,7 @@ reservationApp.controller('ReservationListCtrl', ['$scope', '$http', function($s
 }]);
 
 reservationApp.controller('ReservationCtrl', ['$scope', '$http', function($scope, $http) {
+    $scope.rootDir = rootDir;
     $scope.loadPage = 0;
     $scope.nrPlayers = [];
     $scope.reservationTyp = 1;
@@ -553,7 +571,7 @@ reservationApp.controller('ReservationCtrl', ['$scope', '$http', function($scope
 		    break;
 		case 2:
 		    $scope.freeReservations = 2 - res_length;
-		    var x = 2 - $scope.freeReservations;
+		    var x = $scope.freeReservations;
 		    $("input[name='gamelength']").TouchSpin({
 			initval: 1,
 			min: 1,
@@ -654,7 +672,6 @@ reservationApp.controller('ReservationCtrl', ['$scope', '$http', function($scope
     
     
     init();
-
     
 //    currentLogin();
 //    loadPlayers();
@@ -670,6 +687,21 @@ reservationApp.controller('ReservationCtrl', ['$scope', '$http', function($scope
 
 reservationApp.controller('LoginCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.failure = getParameterByName("failure");
+    $scope.rootDir = rootDir;
+    $scope.gotoLoc = function (loc) {
+	window.open(rootDir + loc, '_self');
+    }
+    $scope.login = function () {
+	console.log(url + "/auth/login");
+//	$http.get(url + "/auth/login").success(function (data) {
+//	});
+    };
+    var loginForm = document.getElementById("loginform");
+    var registerForm = document.getElementById("registerform");
+
+    if (loginForm != null) { loginForm.action = rootDir + 'auth/login'; }
+    if (registerForm != null) { registerForm.action = rootDir + 'auth/register'; }
+			     
 }]);
 
 reservationApp.controller('StatCtrl', ['$scope', '$http', function($scope, $http) {
@@ -727,6 +759,7 @@ reservationApp.controller('HelpCtrl', ['$scope', '$http', function($scope, $http
 }]);
 
 reservationApp.controller('AdminCtrl', ['$scope', '$http', function($scope, $http) {
+    $scope.rootDir = rootDir;
     $scope.users = null;
     var getUsers = function () {
 	$http.get(url + "/get/users").success(function (data) {
@@ -790,6 +823,7 @@ reservationApp.controller('AdminCtrl', ['$scope', '$http', function($scope, $htt
 }]);
 
 reservationApp.controller('PersonCtrl', ['$scope', '$http', function($scope, $http) {
+    $scope.rootDir = rootDir;
     $scope.currentLoginName = null;
     var currentLogin = function () {
 	return $http.get(url + "/auth/current").success(function (data) {

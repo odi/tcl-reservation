@@ -31,6 +31,7 @@ executable reservation
                      , snap
                      , snap-core >= 0.9.7.2
                      , snap-server >= 0.9.5.1
+                     , snap-cors
                      , sqlite-simple
                      , snaplet-sqlite-simple
                      , text

@@ -67,7 +67,7 @@
 	<h3 class="panel-title">Login</h3>
       </div>
       <div class="panel-body">
-	<form action="/auth/login" data-toggle="validator" role="form">
+	<form action="" id="loginform" data-toggle="validator" role="form">
 	  <div class="form-group has-feedback">
 	    <label for="username" class="control-label">Username</label>
 	    <input type="text" class="form-control" name="username" id="username" required placeholder="Benutzername" data-error="Feld muß ausgefüllt sein!"></input>
@@ -82,10 +82,10 @@
 	  </div>
 	  <br/>
 	  <input type="submit" class="btn btn-success" value="Login"/>
-	  <button type="button" class="btn btn-info" onclick="window.open('/register.html', '_self')">Neuer Benutzer</button>
+	  <button type="button" class="btn btn-info" ng-click="gotoLoc('register.html')">Neuer Benutzer</button>
 	</form>
       </div>
     </div>
-    
+    <div ng-include="'footer.html'"></div>    
   </body>
 </html>

@@ -5,9 +5,9 @@ let
   inherit (nixpkgs) pkgs;
 
   f = { mkDerivation, aeson, base, base64-bytestring, bytestring
-      , either, errors, lens, lists, old-time, snap, snap-core
-      , snap-server, snaplet-sqlite-simple, sqlite-simple, stdenv, text
-      , time, transformers, utf8-string
+      , directory, either, errors, lens, lists, old-time, snap, snap-core
+      , snap-cors, snap-server, snaplet-sqlite-simple, sqlite-simple
+      , stdenv, text, time, transformers, utf8-string
       }:
       mkDerivation {
         pname = "reservation";
@@ -16,9 +16,10 @@ let
         isLibrary = false;
         isExecutable = true;
         executableHaskellDepends = [
-          aeson base base64-bytestring bytestring either errors lens lists
-          old-time snap snap-core snap-server snaplet-sqlite-simple
-          sqlite-simple text time transformers utf8-string
+          aeson base base64-bytestring bytestring directory either errors
+          lens lists old-time snap snap-core snap-cors snap-server
+          snaplet-sqlite-simple sqlite-simple text time transformers
+          utf8-string
         ];
         license = stdenv.lib.licenses.bsd3;
       };

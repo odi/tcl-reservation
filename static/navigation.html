@@ -12,7 +12,7 @@
         <span class="icon-bar"></span>
       </button>
       <!-- Brand Logo -->
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand" href="{{rootDir}}">
         <img alt="TC Laa" src="logo-laa.png"/>
 	<span>TC Laa</span>
       </a>
@@ -22,11 +22,11 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <!-- check if logged in or not -->
       <ul class="nav navbar-nav" ng-if="currentLoginName == null || currentLoginName == ''">
-	<li><a href="/login.html">Login</a></li>
+	<li><a href="{{rootDir}}login.html">Login</a></li>
       </ul>
       <ul class="nav navbar-nav" ng-if="currentLoginName != null && currentLoginName != ''">
-	<li><a href="/">Reservierungen</a></li>
-        <li class=""><a href="new.html">Neue Reservierung</a></li>
+	<li><a href="{{rootDir}}">Reservierungen</a></li>
+        <li class=""><a href="{{rootDir}}new.html">Neue Reservierung</a></li>
 	<!-- <li><a href="statistic.html">Statistik</a></li> -->
       </ul>
       <ul class="nav navbar-nav navbar-right"
@@ -46,10 +46,10 @@
           <ul class="dropdown-menu">
 	    <!-- <li><a href="help.html">Hilfe</li> -->
 	    <!-- TODO: check on server if user is really su or admin -->
-	    <li><a href="dash.html">{{currentLoginName.fname}} {{currentLoginName.lname}}</a></li>
+	    <li><a href="{{rootDir}}dash.html">{{currentLoginName.fname}} {{currentLoginName.lname}}</a></li>
 	    <li ng-if="currentLoginName.role < 2"><a href="admin.html">Admin</a></li>
 	    <li role="separator" class="divider"></li>
-	    <li><a href="/auth/logout">Logout</a></li>
+	    <li><a href="{{rootDir}}auth/logout">Logout</a></li>
           </ul>
         </li>
       </ul>

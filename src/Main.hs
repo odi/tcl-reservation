@@ -18,7 +18,9 @@ import Data.Time.Clock
 import Data.Time.Calendar
 import Data.Time.LocalTime
 import           Snap.Core            (Snap, Method(..), route, writeBS, dir,
-                                       getParam, getPostParam, method, redirect, logError)
+                                       getParam, getPostParam, method, redirect, logError,
+                                       getRequest)
+import Snap.Core
 import           Snap.Http.Server     (quickHttpServe)
 import           Snap.Util.FileServe  (serveDirectory)
 
@@ -39,6 +41,8 @@ import Snap.Snaplet.SqliteSimple
 
 import System.Directory
 import System.Environment
+
+import Snap.CORS
 
 import qualified Data.ByteString.UTF8 as BU
 
@@ -132,8 +136,8 @@ createPlayer (Just p) = Just $ BSC.unpack p
 
 -- | Handler for creating a reservation and saving it to the database.
 -- TODO: redirect does not work
-handleSaveReservation :: DBName -> Handler App (AuthManager App) ()
-handleSaveReservation db = do
+handleSaveReservation :: DBName -> FilePath -> Handler App (AuthManager App) ()
+handleSaveReservation db root = do
   pPl1    <- fmap T.decodeUtf8 <$> getPostParam "name1"
   pPl2    <- fmap T.decodeUtf8 <$> getPostParam "name2"
   pPl3    <- fmap T.decodeUtf8 <$> getPostParam "name3"
@@ -154,7 +158,7 @@ handleSaveReservation db = do
           (read (BSC.unpack $ fromMaybe "0" pType) :: Int)
           (T.unpack $ fromMaybe "" pCom)
   liftIO $ saveReservation db r
-  redirect "/" -- TODO: redirect does not work
+  redirect $ BSC.pack root -- TODO: redirect does not work
 
   where
     stopTime time length = do
@@ -169,30 +173,32 @@ handleAllPersons db = do
   ps <- liftIO $ getAllPersons db
   writeBS $ BSL.toStrict $ encode ps
 
-handleLogin :: Handler App (AuthManager App) ()
-handleLogin = do
+handleLogin :: FilePath -> Handler App (AuthManager App) ()
+handleLogin root = do
   loginUser "username" "password" (Just "1") onFailure onSuccess
   where
     onFailure f = case f of
       AuthError s       -> redirect $
-                           BSC.pack $ "/login.html?failure=" ++ s
+                           BSC.pack $ root ++ "/login.html?failure=" ++ s
       UserNotFound      -> redirect $
-                           BSC.pack $ "/login.html?failure=Benutzer nicht gefunden"
+                           BSC.pack $ root ++ "/login.html?failure=Benutzer nicht gefunden"
       IncorrectPassword -> redirect $
-                           BSC.pack $ "/login.html?failure=Falsches Passwort"
-      _                 -> redirect $ "/login.html?failure=Undefined error"
+                           BSC.pack $ root ++ "/login.html?failure=Falsches Passwort"
+      _                 -> redirect $
+                           BSC.pack $ root ++ "/login.html?failure=Undefined error"
     onSuccess = do
       mu <- currentUser
       case mu of
-        Just _ -> redirect "/"
+        Just _ -> do
+          redirect $ BSC.pack root
         Nothing -> writeBS "Can't happen"
 
-logoutHandler :: Handler App (AuthManager App) ()
-logoutHandler = logoutUser $ redirect "/"
+logoutHandler :: FilePath -> Handler App (AuthManager App) ()
+logoutHandler root = logoutUser $ redirect $ BSC.pack root
 
 -- | Handler for registering a new user in the database.
-handleRegisterNewUser :: DBName -> Handler App (AuthManager App) ()
-handleRegisterNewUser db = do
+handleRegisterNewUser :: DBName -> FilePath -> Handler App (AuthManager App) ()
+handleRegisterNewUser db root = do
   pFName <- getParam "fname"
   pLName <- getParam "lname"
   pEmail <- getParam "email"
@@ -206,15 +212,15 @@ handleRegisterNewUser db = do
          (T.pack . BSC.unpack $ fromMaybe "" pLName)
          (T.pack . BSC.unpack $ fromMaybe "" pEmail)
          (userLogin u) Member)
-      redirect "/"
+      redirect $ BSC.pack root
 
-handleCurrentUser :: DBName -> Handler App (AuthManager App) ()
-handleCurrentUser db = currentUser >>= go
+handleCurrentUser :: DBName -> FilePath -> Handler App (AuthManager App) ()
+handleCurrentUser db root = currentUser >>= go
   where
     go Nothing  = do writeBS $ ""
     go (Just u) = do
       case userId u of
-        Nothing -> redirect "/auth/login"
+        Nothing -> redirect $ BSC.pack $ root ++ "/auth/login"
         Just u' -> do
           u'' <- liftIO $ getUserByAuthId db u'
           writeBS $ BSL.toStrict $ encode u''
@@ -237,8 +243,8 @@ handleReservations db = do
   res <- liftIO $ getAllReservations db
   writeBS $ BSL.toStrict $ encode res
 
-handleDeleteReservation :: DBName -> Handler App (AuthManager App) ()
-handleDeleteReservation db = do
+handleDeleteReservation :: DBName -> FilePath -> Handler App (AuthManager App) ()
+handleDeleteReservation db root = do
   pResId <- getParam "resId"
   user   <- currentUser
   case pResId of
@@ -249,15 +255,16 @@ handleDeleteReservation db = do
         Just u  -> do
           liftIO $ dropReservation db (read (BSC.unpack rid) :: Integer)
             (fromMaybe (UserId "") $ userId u)
-          redirect "/"  -- TODO: redirect does not work!
+          redirect $ BSC.pack root  -- TODO: redirect does not work!
 
 handleTest :: Handler App (AuthManager App) ()
 handleTest = do
   t <- getParam "test"
+  req <- getRequest
   dir <- liftIO getCurrentDirectory
-  liftIO $ print (T.unpack . T.decodeUtf8 $ fromJust t)
-  liftIO $ putStrLn (T.unpack . T.decodeUtf8 $ fromJust t)
-  writeBS $ BSC.pack $ dir
+  liftIO $ print (rqPathInfo req)
+  liftIO $ print (rqContextPath req)
+  writeBS $ rqContextPath req `BSC.append` rqPathInfo req
 
 handleAllUsers :: DBName -> Handler App (AuthManager App) ()
 handleAllUsers db = do
@@ -273,8 +280,8 @@ handleUpdateUser db = do
   liftIO $ updateUser db (user {usrRole = roleFromInt $ (read (BSC.unpack $ fromJust pRole) :: Int)})
   writeBS ""
 
-handleFreeCourts :: DBName -> Handler App (AuthManager App) ()
-handleFreeCourts db = do
+handleFreeCourts :: DBName -> FilePath -> Handler App (AuthManager App) ()
+handleFreeCourts db root = do
   pDate   <- getParam "date"
   pTime   <- getParam "time"
   pLength <- getParam "length"
@@ -286,7 +293,7 @@ handleFreeCourts db = do
       res'    = filterReservationsByDateTime res (BSC.unpack (fromMaybe today pDate))
                 (BSC.unpack (fromMaybe "00:00" pTime))
                 (read (BSC.unpack $ fromMaybe "1" pLength) :: Int)
-  redirect "/"
+  redirect $ BSC.pack root
   -- case cu of
   --   Nothing -> redirect "/auth/login"
   --   Just u  -> do
@@ -297,29 +304,31 @@ handleFreeCourts db = do
   --     redirect "/"
   
 -- | Configuration of the main app.
-app :: DBName -> FilePath -> SnapletInit App App
-app db wdir = makeSnaplet "app" "reservation system" Nothing $ do
+app :: DBName -> FilePath -> FilePath -> SnapletInit App App
+app db wdir root = makeSnaplet "app" "reservation system" Nothing $ do
   s <- nestSnaplet "session" sess $
        initCookieSessionManager "site_key.txt" "cookie" Nothing
   a <- nestSnaplet "auth" auth $
        initJsonFileAuthManager defAuthSettings sess "users.json"
   d <- nestSnaplet "db" dbr sqliteInit
-  addRoutes [ ("/auth/login", with auth $ handleLogin)
-            , ("/auth/logout", with auth $ logoutHandler)
-            , ("/auth/register", with auth $ handleRegisterNewUser db)
-            , ("/auth/current", with auth $ handleCurrentUser db)
+  addRoutes [ ("/auth/login", with auth $ handleLogin root)
+            , ("/auth/logout", with auth $ logoutHandler root)
+            , ("/auth/register", with auth $ handleRegisterNewUser db root)
+            , ("/auth/current", with auth $ handleCurrentUser db root)
             , ("/get/persons", with auth $ handleAllPersons db)
             , ("/get/users", with auth $ handleAllUsers db)
             , ("/get/resbydatetime", with auth $ handleReservationsByDateTime db)
             , ("/get/resbydate", with auth $ handleReservationsByDate db)
             , ("/get/resbyuser", with auth $ handleReservationsByAuthId db)
             , ("/get/reservations", with auth $ handleReservations db)
-            , ("/get/freecourts", with auth $ handleFreeCourts db)
-            , ("/del/reservation", with auth $ handleDeleteReservation db)
-            , ("/put/reservation", with auth $ method POST (handleSaveReservation db))
+            , ("/get/freecourts", with auth $ handleFreeCourts db root)
+            , ("/del/reservation", with auth $ handleDeleteReservation db root)
+            , ("/put/reservation", with auth $ method POST (handleSaveReservation db root))
             , ("/put/user", with auth $ method POST (handleUpdateUser db))
             , ("/test", with auth $ handleTest)
-            , ("/", serveDirectory (wdir ++ "static"))
+            , ("/tclaa/test", with auth $ handleTest)
+            , ("/tclaa/auth/login", with auth $ handleTest)
+            , ("/", applyCORS defaultOptions $ serveDirectory (wdir ++ "static"))
             ]
   return $ App a s d
 
@@ -330,8 +339,9 @@ main = do
   args <- getArgs
   let workingDir = args !! 0
   let db = args !! 1
+  let root = args !! 2
   putStrLn $ "working directory: " ++ workingDir
   putStrLn $ "database: " ++ db
-  serveSnaplet defaultConfig $ app db workingDir
+  serveSnaplet defaultConfig $ app db workingDir root
 --  let db = "reservation.db"
 --  quickHttpServe (site db)
