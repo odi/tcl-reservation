@@ -1,0 +1,25 @@
+# Reservation system of my local tennis club
+
+## Building, Installation and Deployment
+We use the **nix** environment to build, install and deploy the
+application. For local building and testing switch to a nix-shell
+environment. 
+```
+cabal2nix . --shell > shell.nix
+nix-shell -I nixpkgs=$HOME/nixpkgs --arg compiler \"ghc7103\"
+```
+
+Then you can build the application
+```
+cabal build
+```
+For the deployment there are some *.nix files to build the
+application, produce an environment with a systemd service an deploy
+the application to a local container or a container on a remote
+server. For this process we use **nixops**.
+
+First we create a nixops environment and deploy it to a remote server:
+```
+nixops create -d tclres-remote tclres-server.nix tclres-container-remote.nix
+nixops deploy -d tclres-remote
+```
